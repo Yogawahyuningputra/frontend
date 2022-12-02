@@ -1,0 +1,131 @@
+
+ 
+{id: 3, name: "Bubble Tea Gelatin", price: 30000, image: "https://i.imgur.com/FxXiqOd.png"}
+3
+: 
+{id: 4, name: "Green Coconut", price: 27000, image: "https://i.imgur.com/qOM164y.png"}
+4
+: 
+{id: 5, name: "Manggo", price: 22000, image: "https://i.imgur.com/hraEZqv.png"}
+5
+: 
+{id: 6, name: "Boba Manggo", price: 29000, image: "https://i.imgur.com/kIQ87kP.png"}
+6
+: 
+{id: 7, name: "Bill Berry Boba", price: 27000, image:
+ "https://i.imgur.com/OeLQBSe.png"}
+7
+: 
+{id: 8, name: "Kiwi Popping Pearl", price: 40000, image:
+ "https://i.imgur.com/tRAC4ko.png"}
+8
+: 
+{id: 9, name: "Matcha Cantaloupe", price: 54000, image: 
+"https://i.imgur.com/ShIP3Xt.png"}
+9
+: 
+{id: 10, name: "Strawberry Popping", price: 17000, image:
+ "https://i.imgur.com/51XRDKE.png"}
+10
+: 
+{id: 11, name: "Bubble Tea Gelatin", price: 4000, image: "https://i.imgur.com/FxXiqOd.png"}
+
+
+
+
+[{id: 0, name: "Clepon Coffer", price: 40000, image: "https://i.imgur.com/nQkW9fb.png"},…]
+0
+: 
+{id: 0, name: "Clepon Coffer", price: 40000, image: "https://i.imgur.com/nQkW9fb.png"}
+1
+: 
+{id: 1, name: "Bubble Tea Gelatin", price: 100000, image: "https://i.imgur.com/hcF1ZIq.png"}
+2
+: 
+{id: 2, name: "test image", price: 2000, image: "https://i.imgur.com/FxXiqOd.png"}
+
+
+
+  const navigate = useNavigate()
+  const [state, dispatch] = useContext(UserContext);
+  const params = useParams();
+  const id = params.id;
+
+  //Set Topping
+  const [topping, setTopping] = useState([]);
+  const [toppingID, setToppingID] = useState([]);
+
+  const handleOnChange = (e) => {
+    let addTopping = [...topping];
+    if (e.target.checked) {
+      addTopping = [...topping, e.target.value];
+    } else {
+      addTopping.splice(topping.indexOf(e.target.value));
+
+    }
+    setTopping(addTopping);
+
+
+    let toppingId = [...toppingID];
+    if (e.target.checked) {
+      toppingId = [...toppingID, parseInt(e.target.title)];
+
+    } else {
+      toppingId.splice(toppingID.indexOf(e.target.title));
+    }
+    setToppingID(toppingID)
+  };
+  console.log(toppingID)
+
+
+  let { data: product } = useQuery('productCaches', async () => {
+    const response = await API.get(`/product/${id}`)
+    console.log(response)
+    return response.data.data;
+  });
+
+  let { data: toppings } = useQuery('toppingChaches', async () => {
+    const resp = await API.get('toppings');
+    console.log(resp)
+    return resp.data.data
+  });
+
+  //add price
+  let toppingTotal = topping.reduce((a, b) => {
+    return a + parseInt(b);
+  }, 0);
+
+  let subTotal = product.price + toppingTotal;
+
+  const handleOnSubmit = useMutation(async (e) => {
+    try {
+      e.preventDefault();
+
+      const config = {
+        headers: {
+          "Content-type": "application/json",
+        },
+      };
+      const body = JSON.stringify({
+        topping_id: toppingID,
+        subTotal: subTotal,
+        product_id: parseInt(id),
+      });
+      console.log("sub total" + subTotal);
+      console.log("a", body)
+
+      const response = await API.post("/order", body, config);
+      console.log(response);
+
+    } catch (error) {
+      console.log(error);
+    }
+    navigate('/Cart')
+  });
+
+  useEffect(() => {
+    if (state.isLogin === false || state.user.status === "admin") {
+      navigate('/')
+    }
+  }, [state])
+
