@@ -21,7 +21,7 @@ function DetailProduct() {
   })
 
   //produk
-  let { data: product } = useQuery("productsCache", async () => {
+  let { data: productDetail } = useQuery("producdetailsCache", async () => {
     const response = await API.get("/product/" + id)
     return response.data.data
   })
@@ -45,7 +45,7 @@ function DetailProduct() {
       setToppingPrice(Number(toppingPrice) - Number(price))
     }
   }
-  let subTotal = product?.price + toppingPrice
+  let subTotal = productDetail?.price + toppingPrice
 
   const HandleAddCart = useMutation(async (e) => {
     try {
@@ -60,14 +60,14 @@ function DetailProduct() {
       const data = {
         qty: 1,
         subtotal: subTotal,
-        product_id: product.id,
+        product_id: productDetail.id,
         topping_id: toppingCheck,
       }
 
       const body = JSON.stringify(data)
 
-      const respone = await API.post("/order", body, config)
-      console.log("respon Order :", respone)
+      const response = await API.post("/order/" + productDetail.id, body, config)
+      console.log("respon Order :", response)
       navigate("/Cart")
     } catch (error) {
       console.log(error)
@@ -75,7 +75,7 @@ function DetailProduct() {
   })
 
   useEffect(() => {
-    if (state.isLogin === false || state.user.role === "admin") {
+    if (state.user.role === "admin") {
       navigate("/Admin")
     }
   }, [state])
@@ -198,7 +198,7 @@ function DetailProduct() {
             /> */}
           <Card.Img
             variant="top"
-            src={product?.image}
+            src={productDetail?.image}
             style={{ width: "400px", height: "500px" }}
 
           />
@@ -216,8 +216,8 @@ function DetailProduct() {
 
               }}
               >
-                {product?.title}</Card.Title>
-              <Card.Text style={{ color: "#bd0707", marginTop: "20px", fontWeight: "bold", marginLeft: "20px" }}>{formatIDR.format(product?.price)}</Card.Text>
+                {productDetail?.title}</Card.Title>
+              <Card.Text style={{ color: "#bd0707", marginTop: "20px", fontWeight: "bold", marginLeft: "20px" }}>{formatIDR.format(productDetail?.price)}</Card.Text>
               <Card.Text style={{ color: "#bd0707", marginTop: "20px", fontWeight: "bold", marginLeft: "20px" }}>Topping</Card.Text>
               <Row xs="4" className="mt-4"> {toppings?.map((topping) => (
                 <div className="py-2" onClick={() => handleChecked(topping?.id, topping?.price)}>
@@ -270,7 +270,7 @@ function DetailProduct() {
                   <Card.Text className="total" >Total</Card.Text>
                   <Card.Text className="ms-auto">{formatIDR.format(subTotal)}</Card.Text>
                 </Col>
-                <Button onClick={HandleAddCart}
+                <Button onClick={(e) => HandleAddCart.mutate(e)}
                   variant="danger"
                   className="w-100 d-grid gap-2"
                   size="lg"

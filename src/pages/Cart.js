@@ -33,7 +33,37 @@ function Cart() {
         return res.data.data;
 
     });
-    console.log("data", order)
+    console.log("data order", order)
+    const pay = []
+    const [DataPay, setDataPay] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        posCode: "",
+        address: "",
+    })
+
+    const addDataPay = JSON.parse(localStorage.getItem("DATA_PAY"))
+    const handleonChange = (e) => {
+        setDataPay({
+            ...DataPay,
+            [e.target.name]: e.target.value,
+        })
+    }
+    const handleOnSubmit = (e) => {
+        e.preventDefault()
+
+        if (addDataPay === null) {
+            pay.push(DataPay)
+            localStorage.setItem("DATA_PAY", JSON.stringify(pay))
+        } else {
+            addDataPay.forEach((element) => {
+                pay.push(element)
+            })
+            pay.push(DataPay)
+            localStorage.setItem("DATA_PAY", JSON.stringify(pay))
+        }
+    }
 
 
 
@@ -67,9 +97,12 @@ function Cart() {
                                 <p style={{ fontWeight: "bold" }}>{data?.product?.title}</p>
                                 <p>Topping :&nbsp;
 
-                                    {/* {`${order?.topping.map(
-                                        (e) => product?.topping?.title
-                                    )}`} */}
+                                    {data?.toppings?.map(
+                                        (e) => (
+                                            <>
+                                                {e?.title},&nbsp;
+                                            </>
+                                        ))}
                                 </p>
                             </Card.Text>
                             <Card.Text className="ms-auto" >

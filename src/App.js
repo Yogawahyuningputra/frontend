@@ -1,5 +1,5 @@
-import React, { Profiler, useContext, useEffect, useState } from "react";
-import { Routes, Route, useNavigate, Outlet, Navigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Navbar from "./component/Navbar";
 import { API, setAuthToken } from './config/api';
 import { UserContext } from './context/userContext';

@@ -7,13 +7,11 @@ import Stack from 'react-bootstrap/Stack';
 import Img from "react-bootstrap/Image";
 import Rectangle4 from "../assest/images/Rectangle4.png";
 import Brand from "../assest/images/Headerwaysbucks.png";
-// import Profile from "../assest/images/Profile.png";
+import Profile from "../assest/images/Profile.png";
 
 import QR from "../assest/images/qrcode.png";
 function Cart() {
 
-
-    const DataLogin = JSON.parse(localStorage.getItem("USER_LOGIN"))
     return (
         <Container className="d-flex mx-auto mt-4 justify-content-center">
             <Row>
@@ -28,7 +26,7 @@ function Cart() {
                         <Card.Body className="rounder-2">
                             <Img
 
-                                src={DataLogin[0].imageUser}
+                                src={Profile}
                                 style={{
                                     width: "200px",
                                     height: "240px",
@@ -40,11 +38,11 @@ function Cart() {
                         <Card.Body>
                             <Card.Text className="">
                                 <p style={{ fontWeight: "bold" }}>Fullname</p>
-                                <p>{DataLogin[0].name}</p>
+                                {/* <p>{DataLogin[0].name}</p> */}
                             </Card.Text>
                             <Card.Text className="">
                                 <p style={{ fontWeight: "bold" }}>Email</p>
-                                <p>{DataLogin[0].email}</p>
+                                {/* <p>{DataLogin[0].email}</p> */}
                             </Card.Text>
                         </Card.Body>
                     </Stack>
@@ -117,7 +115,7 @@ function Cart() {
                                         style={{
                                             width: "70px",
                                             height: "70px",
-                                            marginLeft: "35px",
+                                            marginLeft: "30px",
                                             marginBottom: "30px",
                                             marginTop: "10px",
                                         }}
@@ -129,12 +127,12 @@ function Cart() {
                                         style={{
                                             width: "70px",
                                             height: "70px",
-                                            marginLeft: "35px",
+                                            marginLeft: "30px",
                                             marginTop: "10px"
                                         }}
                                     />
-                                    <Card.Text className="mt-3" style={{ color: "#00D1FF", fontSize: "10px", marginLeft: "40px" }}>On The Way</Card.Text>
-                                    <Card.Text style={{ color: "#974A4A", marginLeft: "25px", fontSize: "10px" }}>Sub Total : Rp.54.000</Card.Text>
+                                    <Card.Text className="mt-3" style={{ color: "#00D1FF", fontSize: "10px", marginLeft: "35px" }}>On The Way</Card.Text>
+                                    <Card.Text style={{ color: "#974A4A", marginLeft: "40px", fontSize: "10px" }}>Sub Total : Rp.54.000</Card.Text>
                                 </Card.Body>
 
                             </Card.Body>
