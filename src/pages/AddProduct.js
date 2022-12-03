@@ -48,6 +48,7 @@ function AddProduct() {
             const response = await API.post("/product", formData, config)
             console.log("Data Product", response)
             const alert = (<Alert variant='success' className='py-1'>
+                Add Product Success
             </Alert>)
             setMessage(alert)
             dataProduct({
@@ -141,7 +142,7 @@ function AddProduct() {
                             >
                                 Add Product
                             </Button>
-                            <PopUpProduct show={modalShow} onHide={() => setModalShow(false)} />
+                            {/* <PopUpProduct show={modalShow} onHide={() => setModalShow(false)} /> */}
                         </Form>
                     </Container>
                 </Col>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -20,7 +20,8 @@ import DeleteData from '../component/popUpDelete';
 
 function Cart() {
     const navigate = useNavigate()
-    // const { id } = useParams()
+
+    const [modalShow, setModalShow] = useState(false)
 
     const { data: order, refetch } = useQuery("ordersCache", async (id) => {
         const config = {
@@ -69,7 +70,7 @@ function Cart() {
                     Authorization: "Basic" + localStorage.token,
                 },
             }
-            await API.delete(`/order/` + id);
+            await API.delete(`/order/` + id, config);
             refetch();
         } catch (error) {
             console.log(error);
@@ -83,7 +84,12 @@ function Cart() {
             setConfirmDelete(null);
         }
     }, [confirmDelete]);
-
+    // Format harga
+    const formatIDR = new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+    })
 
     // Handle Payment
     const addDataPay = JSON.parse(localStorage.getItem("DATA_PAY"))
@@ -125,13 +131,13 @@ function Cart() {
                     </Stack>
                     <hr></hr>
                     {order?.map((data, index) => (
-                        <Stack direction="horizontal" xs={2} gap={3} style={{ marginTop: "0px" }}>
-                            <Card className="image">
+                        <Stack direction="horizontal" xs={2} gap={3} className="mt-0">
+                            <Card className="mb-2">
                                 <Img
                                     src={data?.product?.image}
                                     style={{
                                         width: "100px",
-                                        height: "100px",
+                                        height: "120px",
                                         border: "20px"
                                     }}
                                 />
@@ -148,8 +154,8 @@ function Cart() {
                                         ))}
                                 </p>
                             </Card.Text>
-                            <Card.Text className="ms-auto" >
-                                <Card.Text >{data?.product?.price}</Card.Text>
+                            <Card.Text className="mb-5 ms-auto" >
+                                <Card.Text >{data?.price}</Card.Text>
                                 <Card.Text>
                                     <Button onClick={() => {
                                         handleDelete(data?.id);
@@ -186,13 +192,13 @@ function Cart() {
                         </Card.Body>
                         <Card.Body>
                             <Card.Text style={{}} className="text-end">
-                                {/* {!!dataCart === false || dataCart.length === 0
+                                {!!order === false || order.length === 0
                                     ? 0
                                     : formatIDR.format(
-                                        dataCart
-                                            .map((e) => e.total)
+                                        order
+                                            .map((e) => e.price)
                                             .reduce((a, b) => a + b)
-                                    )} */}
+                                    )}
                             </Card.Text>
                             <Card.Text style={{}} className="Quantity  text-end">
 
@@ -208,13 +214,13 @@ function Cart() {
                         </Card.Body>
                         <Card.Body>
                             <Card.Text style={{}} className="text-end">
-                                {/* {!!orders === false || orders?.length === 0
+                                {!!order === false || order?.length === 0
                                     ? 0
                                     : formatIDR.format(
-                                        orders
-                                            .map((e) => e.total)
+                                        order
+                                            .map((e) => e.price)
                                             .reduce((a, b) => a + b)
-                                    )} */}
+                                    )}
                             </Card.Text>
                         </Card.Body>
                     </Stack>
@@ -277,7 +283,7 @@ function Cart() {
                                 />
                             </Form.Group>
                             <Button
-                                // onClick={() => { setModalShow(true) }}
+                                onClick={() => { setModalShow(true) }}
                                 variant="danger"
                                 className="w-100 d-grid gap-2"
                                 size="lg"
@@ -285,7 +291,7 @@ function Cart() {
                             >
                                 Pay
                             </Button>
-                            {/* <ModalPopUp show={modalShow} onHide={() => setModalShow(false)} /> */}
+                            <ModalPopUp show={modalShow} onHide={() => setModalShow(false)} />
                         </Form>
                     </Container>
                 </Col>

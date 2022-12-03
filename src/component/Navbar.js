@@ -14,6 +14,7 @@ import { useQuery } from "react-query";
 function NavBar() {
   const [state, dispatch] = useContext(UserContext);
   console.log("isi dari state", state);
+  console.log("ini dispatch", dispatch)
 
   const [LoginShow, setLoginShow] = useState(false);
   const [RegisterShow, setRegisterShow] = useState(false);
@@ -54,7 +55,8 @@ function NavBar() {
           ) : (
             <>
               {state.user.role === "admin" ? (
-                <DropdownAdmin />
+
+                < DropdownAdmin />
               ) : (
                 <div>
                   {order?.length >= 1 && (

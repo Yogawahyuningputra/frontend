@@ -74,9 +74,11 @@ function DetailProduct() {
     }
   })
 
+  // button disable if status admin
+  const [isDisabled, setDisabled] = useState(false);
   useEffect(() => {
-    if (state.user.role === "admin") {
-      navigate("/Admin")
+    if (state.user.role === "admin" || state.isLogin === false) {
+      setDisabled(true);
     }
   }, [state])
 
@@ -185,7 +187,7 @@ function DetailProduct() {
   return (
     <Container className="my-5">
       <Row xs={1} md={2} className="d-flex justify-content-center ">
-        <Col xs lg="5" className="mt-2 rounded-4 border-0 ">
+        <Col xs lg="5" className="mt-4 rounded-4 border-0 ">
           {/* <Img
               src={Brands}
               style={{
@@ -206,7 +208,7 @@ function DetailProduct() {
         </Col>
         <Col >
 
-          <Card className="mt-2 d-flex justify-content-center">
+          <Card className="mt-2 d-flex justify-content-center border border-white">
             <Card.Body>
               <Card.Title style={{
                 color: "#bd0707",
@@ -270,7 +272,7 @@ function DetailProduct() {
                   <Card.Text className="total" >Total</Card.Text>
                   <Card.Text className="ms-auto">{formatIDR.format(subTotal)}</Card.Text>
                 </Col>
-                <Button onClick={(e) => HandleAddCart.mutate(e)}
+                <Button onClick={(e) => HandleAddCart.mutate(e)} disabled={isDisabled}
                   variant="danger"
                   className="w-100 d-grid gap-2"
                   size="lg"
