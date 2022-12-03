@@ -48,7 +48,6 @@ function AddProduct() {
             const response = await API.post("/product", formData, config)
             console.log("Data Product", response)
             const alert = (<Alert variant='success' className='py-1'>
-                Success
             </Alert>)
             setMessage(alert)
             dataProduct({

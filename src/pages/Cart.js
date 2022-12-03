@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -14,26 +14,27 @@ import ModalPopUp from "../component/pop-up";
 import Login from "../component/Login";
 import Register from "../component/Register";
 import { API } from "../config/api";
-import { useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
+import DeleteData from '../component/popUpDelete';
 
 
 function Cart() {
     const navigate = useNavigate()
+    // const { id } = useParams()
 
-    // const DataLogin = JSON.parse(localStorage.getItem("USER_LOGIN"))
-
-    const { data: order } = useQuery("ordersCache", async () => {
+    const { data: order, refetch } = useQuery("ordersCache", async (id) => {
         const config = {
             method: "GET",
             headers: {
                 Authorization: "Basic " + localStorage.token,
             },
         }
-        const res = await API.get("/orders", config);
+        const res = await API.get(`/orders`, config);
         return res.data.data;
 
     });
     console.log("data order", order)
+
     const pay = []
     const [DataPay, setDataPay] = useState({
         name: "",
@@ -43,6 +44,48 @@ function Cart() {
         address: "",
     })
 
+    // Handle Delete
+    // Variabel for delete product data
+    const [idDelete, setIdDelete] = useState(null);
+    const [confirmDelete, setConfirmDelete] = useState(null);
+
+    // Modal Confirm delete data
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    // For get id product & show modal confirm delete data
+    const handleDelete = (id) => {
+        setIdDelete(id);
+        handleShow();
+    };
+
+    // If confirm is true, execute delete data
+    const deleteById = useMutation(async (id) => {
+        try {
+            const config = {
+                method: "DELETE",
+                headers: {
+                    Authorization: "Basic" + localStorage.token,
+                },
+            }
+            await API.delete(`/order/` + id);
+            refetch();
+        } catch (error) {
+            console.log(error);
+        }
+    });
+
+    useEffect(() => {
+        if (confirmDelete) {
+            handleClose();
+            deleteById.mutate(idDelete);
+            setConfirmDelete(null);
+        }
+    }, [confirmDelete]);
+
+
+    // Handle Payment
     const addDataPay = JSON.parse(localStorage.getItem("DATA_PAY"))
     const handleonChange = (e) => {
         setDataPay({
@@ -82,18 +125,18 @@ function Cart() {
                     </Stack>
                     <hr></hr>
                     {order?.map((data, index) => (
-                        <Stack direction="horizontal" xs={2} gap={3} style={{ marginTop: "20px" }}>
+                        <Stack direction="horizontal" xs={2} gap={3} style={{ marginTop: "0px" }}>
                             <Card className="image">
                                 <Img
                                     src={data?.product?.image}
                                     style={{
-                                        width: "80px",
-                                        height: "80px",
+                                        width: "100px",
+                                        height: "100px",
                                         border: "20px"
                                     }}
                                 />
                             </Card>
-                            <Card.Text className="">
+                            <Card.Text className="mx-4">
                                 <p style={{ fontWeight: "bold" }}>{data?.product?.title}</p>
                                 <p>Topping :&nbsp;
 
@@ -108,7 +151,10 @@ function Cart() {
                             <Card.Text className="ms-auto" >
                                 <Card.Text >{data?.product?.price}</Card.Text>
                                 <Card.Text>
-                                    <Button style={{ backgroundColor: "white", border: "none" }}>
+                                    <Button onClick={() => {
+                                        handleDelete(data?.id);
+                                    }}
+                                        style={{ backgroundColor: "white", border: "none" }}>
                                         <Img
                                             src={Delete}
                                             style={{
@@ -119,6 +165,13 @@ function Cart() {
                                             }}
                                         />
                                     </Button>
+
+                                    <DeleteData
+                                        setConfirmDelete={setConfirmDelete}
+                                        show={show}
+                                        handleClose={handleClose}
+                                    />
+
                                 </Card.Text>
                             </Card.Text>
                         </Stack>
