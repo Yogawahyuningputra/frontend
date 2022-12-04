@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -16,13 +16,14 @@ import Register from "../component/Register";
 import { API } from "../config/api";
 import { useQuery, useMutation } from "react-query";
 import DeleteData from '../component/popUpDelete';
+import { UserContext } from "../../src/context/userContext";
 
 
 function Cart() {
     const navigate = useNavigate()
 
     const [modalShow, setModalShow] = useState(false)
-
+    const [state] = useContext(UserContext)
     const { data: order, refetch } = useQuery("ordersCache", async (id) => {
         const config = {
             method: "GET",
@@ -30,20 +31,11 @@ function Cart() {
                 Authorization: "Basic " + localStorage.token,
             },
         }
-        const res = await API.get(`/orders`, config);
+        const res = await API.get(`/order/` + id, config);
         return res.data.data;
-
     });
     console.log("data order", order)
 
-    const pay = []
-    const [DataPay, setDataPay] = useState({
-        name: "",
-        email: "",
-        phone: "",
-        posCode: "",
-        address: "",
-    })
 
     // Handle Delete
     // Variabel for delete product data
@@ -84,6 +76,7 @@ function Cart() {
             setConfirmDelete(null);
         }
     }, [confirmDelete]);
+
     // Format harga
     const formatIDR = new Intl.NumberFormat(undefined, {
         style: "currency",
@@ -91,28 +84,81 @@ function Cart() {
         maximumFractionDigits: 0,
     })
 
+
+    let Subtotal = 0
+    let Qty = 0
+    let IDtrans = 0
+
+    if (state.role === "user") {
+        order?.map(
+            (element) => (
+                (Subtotal += element.price)
+                    (Qty += element.qty)
+                    (IDtrans = element.transaction_id)
+            )
+        )
+    }
+    console.log(IDtrans)
+
+    //pay
+    // const pay = []
+    const [DataPay, setDataPay] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        posCode: "",
+        address: "",
+    })
+
     // Handle Payment
-    const addDataPay = JSON.parse(localStorage.getItem("DATA_PAY"))
+
     const handleonChange = (e) => {
         setDataPay({
             ...DataPay,
             [e.target.name]: e.target.value,
         })
     }
-    const handleOnSubmit = (e) => {
-        e.preventDefault()
 
-        if (addDataPay === null) {
-            pay.push(DataPay)
-            localStorage.setItem("DATA_PAY", JSON.stringify(pay))
-        } else {
-            addDataPay.forEach((element) => {
-                pay.push(element)
-            })
-            pay.push(DataPay)
-            localStorage.setItem("DATA_PAY", JSON.stringify(pay))
+    const handlePay = useMutation(async (id) => {
+        try {
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+            const formData = new FormData()
+            formData.set("name", DataPay.name)
+            formData.set("email", DataPay.email)
+            formData.set("phone", DataPay.phone)
+            formData.set("poscode", DataPay.poscode)
+            formData.set("address", DataPay.address)
+
+            const requestBody = JSON.stringify(DataPay)
+            const response = await API.patch(
+                "/transaction/" + id, requestBody, formData, config
+            )
+            console.log("data transaksi" / response)
+        } catch (error) {
+            console.log(error)
         }
-    }
+
+
+    })
+
+    // const handleOnSubmit = (e) => {
+    //     e.preventDefault()
+
+    //     if (addDataPay === null) {
+    //         pay.push(DataPay)
+    //         localStorage.setItem("DATA_PAY", JSON.stringify(pay))
+    //     } else {
+    //         addDataPay.forEach((element) => {
+    //             pay.push(element)
+    //         })
+    //         pay.push(DataPay)
+    //         localStorage.setItem("DATA_PAY", JSON.stringify(pay))
+    //     }
+    // }
 
 
 
@@ -155,7 +201,7 @@ function Cart() {
                                 </p>
                             </Card.Text>
                             <Card.Text className="mb-5 ms-auto" >
-                                <Card.Text >{data?.price}</Card.Text>
+                                <Card.Text >{formatIDR.format(data?.price)}</Card.Text>
                                 <Card.Text>
                                     <Button onClick={() => {
                                         handleDelete(data?.id);
@@ -228,12 +274,12 @@ function Cart() {
                 </Col>
 
                 {/* ------------------------Payment--------------------------- */}
+
                 <Col>
                     <Container className="px-5 py-5" style={{ width: "70%", marginTop: "70px" }}>
-                        <Form onSubmit>
+                        <Form onSubmit={() => handlePay.mutate(IDtrans)}>
                             <Form.Group className="mb-4 " controlId="formBasicEmail">
-                                <Form.Control
-
+                                <Form.Control onChange={handleonChange}
                                     className=""
                                     style={{ borderColor: "#bd0707" }}
                                     type="text"
@@ -242,7 +288,7 @@ function Cart() {
                                 />
                             </Form.Group>
                             <Form.Group className="mb-4" controlId="formBasicEmail">
-                                <Form.Control
+                                <Form.Control onChange={handleonChange}
                                     // value={DataPay.email}
                                     className=""
                                     style={{ borderColor: "#bd0707" }}
@@ -253,6 +299,8 @@ function Cart() {
                             </Form.Group>
                             <Form.Group className="mb-4" controlId="formBasicPhone">
                                 <Form.Control
+                                    onChange={handleonChange}
+
                                     // value={DataPay.phone}
                                     className=""
                                     style={{ borderColor: "#bd0707" }}
@@ -262,7 +310,7 @@ function Cart() {
                                 />
                             </Form.Group>
                             <Form.Group className="mb-4" controlId="formBasicNumber">
-                                <Form.Control
+                                <Form.Control onChange={handleonChange}
                                     // value={DataPay.posCode}
                                     className=""
                                     style={{ borderColor: "#bd0707" }}
@@ -273,7 +321,7 @@ function Cart() {
                             </Form.Group>
                             <Form.Group className="mb-4" controlId="formBasicAddress">
                                 <Form.Control
-                                    // onChange={handleonChange}
+                                    onChange={handleonChange}
                                     //     value={DataPay.address}
                                     as="textarea" rows={4}
                                     style={{ borderColor: "#bd0707" }}
@@ -289,7 +337,7 @@ function Cart() {
                                 size="lg"
                                 type="submit"
                             >
-                                Pay
+                                Pay{IDtrans}
                             </Button>
                             <ModalPopUp show={modalShow} onHide={() => setModalShow(false)} />
                         </Form>
@@ -299,8 +347,6 @@ function Cart() {
         </Container>
     )
 }
-//         </>
-//     );
-// }
+
 
 export default Cart;

@@ -31,10 +31,9 @@ function DetailProduct() {
     const response = await API.get("/toppings")
     return response.data.data
   })
-
-  const [toppingCheck, setToppingCheck] = useState([]) //ID TOPING
-  const [toppingPrice, setToppingPrice] = useState([]) //HARGA TOPING
-
+  //ID TOPING //HARGA TOPING
+  const [toppingCheck, setToppingCheck] = useState([])
+  const [toppingPrice, setToppingPrice] = useState([])
   function handleChecked(id, price) {
     let idNow = toppingCheck.filter((e) => e === id)
     if (idNow[0] !== id) {

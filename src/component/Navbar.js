@@ -19,10 +19,13 @@ function NavBar() {
   const [LoginShow, setLoginShow] = useState(false);
   const [RegisterShow, setRegisterShow] = useState(false);
 
-  const { data: order } = useQuery("ordersCache", async () => {
-    const response = await API.get("/orders");
+  const { data: order, refetch } = useQuery("ordersCache", async () => {
+    const response = await API.get("/orders-id");
     return response.data.data;
   });
+  refetch()
+
+
 
   return (
     <div>
@@ -54,8 +57,8 @@ function NavBar() {
             </div>
           ) : (
             <>
-              {state.user.role === "admin" ? (
 
+              {state.user.role === "admin" ? (
                 < DropdownAdmin />
               ) : (
                 <div>
