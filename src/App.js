@@ -64,8 +64,10 @@ function App() {
   };
 
   useEffect(() => {
-    if (localStorage.token)
+    if (localStorage.token) {
+
       checkUser();
+    }
   }, []);
 
   // const userRoute = () => {

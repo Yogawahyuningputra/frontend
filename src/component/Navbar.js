@@ -19,11 +19,16 @@ function NavBar() {
   const [LoginShow, setLoginShow] = useState(false);
   const [RegisterShow, setRegisterShow] = useState(false);
 
-  const { data: order, refetch } = useQuery("ordersCache", async () => {
-    const response = await API.get("/orders-id");
+  const { data: order } = useQuery("orderCache", async () => {
+    const response = await API.get("/orders-id",
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.token}`
+        }
+      });
     return response.data.data;
   });
-  refetch()
+
 
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -11,8 +11,8 @@ import Card from "react-bootstrap/Card";
 import Delete from "../assest/images/delete.png";
 // import Attach from "../assest/images/attach.png";
 import ModalPopUp from "../component/pop-up";
-import Login from "../component/Login";
-import Register from "../component/Register";
+// import Login from "../component/Login";
+// import Register from "../component/Register";
 import { API } from "../config/api";
 import { useQuery, useMutation } from "react-query";
 import DeleteData from '../component/popUpDelete';
@@ -20,18 +20,17 @@ import { UserContext } from "../../src/context/userContext";
 
 
 function Cart() {
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
 
     const [modalShow, setModalShow] = useState(false)
     const [state] = useContext(UserContext)
-    const { data: order, refetch } = useQuery("ordersCache", async (id) => {
-        const config = {
-            method: "GET",
+
+    let { data: order, refetch } = useQuery("orderCache", async (id) => {
+        const res = await API.get(`/orders-id`, {
             headers: {
-                Authorization: "Basic " + localStorage.token,
-            },
-        }
-        const res = await API.get(`/order/` + id, config);
+                Authorization: `Bearer ${localStorage.token}`
+            }
+        });
         return res.data.data;
     });
     console.log("data order", order)
@@ -85,20 +84,28 @@ function Cart() {
     })
 
 
-    let Subtotal = 0
+    let Total = 0
     let Qty = 0
     let IDtrans = 0
 
     if (state.role === "user") {
         order?.map(
             (element) => (
-                (Subtotal += element.price)
+                (Total += element.subtotal)
                     (Qty += element.qty)
                     (IDtrans = element.transaction_id)
             )
         )
     }
-    console.log(IDtrans)
+    console.log("ini", Qty)
+    console.log("ini total", Total)
+    console.log("ini state", state)
+    console.log("ini ID transaction", IDtrans)
+    console.log("data order", order)
+
+    // console.log("ini subtotal", subtotal)
+
+
 
     //pay
     // const pay = []
@@ -119,23 +126,17 @@ function Cart() {
         })
     }
 
-    const handlePay = useMutation(async (id) => {
+    const handlePay = useMutation(async (e) => {
         try {
+            e.preventDefault()
             const config = {
                 headers: {
                     "Content-Type": "application/json",
                 },
             }
-            const formData = new FormData()
-            formData.set("name", DataPay.name)
-            formData.set("email", DataPay.email)
-            formData.set("phone", DataPay.phone)
-            formData.set("poscode", DataPay.poscode)
-            formData.set("address", DataPay.address)
-
             const requestBody = JSON.stringify(DataPay)
             const response = await API.patch(
-                "/transaction/" + id, requestBody, formData, config
+                "/transaction/" + IDtrans, requestBody, config
             )
             console.log("data transaksi" / response)
         } catch (error) {
@@ -144,6 +145,8 @@ function Cart() {
 
 
     })
+
+
 
     // const handleOnSubmit = (e) => {
     //     e.preventDefault()
@@ -163,7 +166,12 @@ function Cart() {
 
 
     return (
-
+        // <>
+        //     {state.isLogin === false ? (
+        //         <>
+        //         </>
+        //     ) : (
+        //         <>
         <Container className="mx-auto mt-4 justify-content-center">
             <Row>
 
@@ -201,7 +209,7 @@ function Cart() {
                                 </p>
                             </Card.Text>
                             <Card.Text className="mb-5 ms-auto" >
-                                <Card.Text >{formatIDR.format(data?.price)}</Card.Text>
+                                <Card.Text >{formatIDR.format(data?.subtotal)}</Card.Text>
                                 <Card.Text>
                                     <Button onClick={() => {
                                         handleDelete(data?.id);
@@ -238,11 +246,11 @@ function Cart() {
                         </Card.Body>
                         <Card.Body>
                             <Card.Text style={{}} className="text-end">
-                                {!!order === false || order.length === 0
+                                {!!order === false || order?.length === 0
                                     ? 0
                                     : formatIDR.format(
                                         order
-                                            .map((e) => e.price)
+                                            .map((e) => e.subtotal)
                                             .reduce((a, b) => a + b)
                                     )}
                             </Card.Text>
@@ -264,7 +272,7 @@ function Cart() {
                                     ? 0
                                     : formatIDR.format(
                                         order
-                                            .map((e) => e.price)
+                                            .map((e) => e.subtotal)
                                             .reduce((a, b) => a + b)
                                     )}
                             </Card.Text>
@@ -277,7 +285,7 @@ function Cart() {
 
                 <Col>
                     <Container className="px-5 py-5" style={{ width: "70%", marginTop: "70px" }}>
-                        <Form onSubmit={() => handlePay.mutate(IDtrans)}>
+                        <Form onSubmit={(e) => handlePay.mutate(e)}>
                             <Form.Group className="mb-4 " controlId="formBasicEmail">
                                 <Form.Control onChange={handleonChange}
                                     className=""
@@ -345,6 +353,9 @@ function Cart() {
                 </Col>
             </Row>
         </Container>
+        //         </>
+        //     )}
+        // </>
     )
 }
 

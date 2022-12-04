@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -12,12 +12,15 @@ import Iconfile from "../assest/images/iconfile.png";
 import { API } from "../config/api";
 import { useMutation } from "react-query";
 import { Alert } from "react-bootstrap";
+import { UserContext } from "../../src/context/userContext";
+
 
 
 function AddTopping() {
     const [modalShow, setModalShow] = useState(false)
     const [preview, setPreview] = useState(null)
     const [message, setMessage] = useState(null);
+    const [state] = useContext(UserContext)
 
 
     // const Topping = []
@@ -66,6 +69,8 @@ function AddTopping() {
             console.log(error)
         }
     })
+
+
     // const handleOnChange = (e) => {
     //     setDataTopping({
     //         ...DataTopping, [e.target.name]: e.target.value,

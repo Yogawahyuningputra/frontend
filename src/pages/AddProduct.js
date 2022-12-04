@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
 import Img from "react-bootstrap/Image";
 // import Brands from "../assest/images/WaysBucks.png"
@@ -7,12 +7,15 @@ import { API } from "../config/api";
 import { useMutation } from "react-query";
 import PopUpProduct from "../component/popUpAddProduct";
 import { Alert } from "react-bootstrap";
+import { UserContext } from "../../src/context/userContext";
 
 
 
 function AddProduct() {
     const [modalShow, setModalShow] = useState(false)
     const [message, setMessage] = useState(null);
+    const [state] = useContext(UserContext)
+
 
     const [preview, setPreview] = useState(null)
     const [dataProduct, setDataProduct] = useState({
