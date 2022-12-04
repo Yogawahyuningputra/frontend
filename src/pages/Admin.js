@@ -1,3 +1,5 @@
+import React, { useContext } from "react";
+
 import Table from 'react-bootstrap/Table';
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
@@ -6,99 +8,149 @@ import Stack from 'react-bootstrap/Stack';
 import Success from "../assest/images/success.png";
 import Cancel from "../assest/images/cancel.png";
 import Img from 'react-bootstrap/Image';
+import { API } from "../config/api";
+import { useQuery, useMutation } from "react-query";
+import { UserContext } from "../../src/context/userContext";
+
 
 function TableProduct() {
+    const [state] = useContext(UserContext)
+
+
+    let { data: admin, refetch } = useQuery(
+        "AdminCache",
+        async () => {
+            if (state.user.role === "admin") {
+                const response = await API.get("/transactions")
+                return response.data.data
+            }
+        })
+
+    console.log("Response Table =>", admin)
+    // const formatIDR = new Intl.NumberFormat(undefined, {
+    //     style: "currency",
+    //     currency: "IDR",
+    //     maximumFractionDigits: 0,
+    // })
+
+    let income = 0
+
+    const HandleCancel = useMutation(async (id) => {
+        console.log("cancel id ", id)
+        try {
+            const res = await API.patch("/canceltrans/" + id)
+            refetch()
+            console.log(res)
+        } catch (error) {
+            console.log(error)
+        }
+    })
+
+    const HandleAccept = useMutation(async (id) => {
+        console.log("accept id", id)
+        try {
+            const response = await API.patch("/accepttrans/" + id)
+            refetch()
+            console.log(response)
+        } catch (error) {
+            console.log(error)
+        }
+    })
     return (
-        <Container style={{ justifyContent: "center", width: "80%", marginTop: "20px" }}>
-            <p style={{ color: "#BD0707", fontSize: "36px", fontWeight: "bold" }}>Income Transaction</p>
-            <Table bordered hover className="mt-5">
-                < thead >
-                    <tr style={{ backgroundColor: "#828282" }}>
-                        <th>No</th>
-                        <th>Name</th>
-                        <th>Address</th>
-                        <th>Post Code</th>
-                        <th>Income</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead >
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Sugeng</td>
-                        <td>Cileungsi</td>
-                        <td>16820</td>
-                        <td style={{ color: "#061E99" }}>69.000</td>
-                        <td style={{ color: "#FF9900" }}>Waiting Approve</td>
-                        <td>
-                            <Stack direction="horizontal" gap={3} className="d-flex justify-content-center">
-                                <Button className="w-50 py-0" variant="danger">Cancel</Button>
-                                <Button className="w-50 py-0" variant="success">Approve</Button>
-                            </Stack>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Haris Garms</td>
-                        <td>Serang</td>
-                        <td>41111</td>
-                        <td style={{ color: "#061E99" }}>30.000</td>
-                        <td style={{ color: "#78A85A" }}>Success</td>
-                        <td>
-                            <div className="d-flex justify-content-center">
-                                <Img
-                                    src={Success}
-                                    style={{
-                                        width: "20px",
-                                        height: "20px",
+        <>
+            <Container>
+                <h2>Transaction</h2>
+                <Table responsive striped bordered hover className="my-3 table-dark">
+                    <thead>
+                        <tr className="table-dark">
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Address</th>
+                            <th>Icome</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            admin === 0 ?
+                                <tr>
+                                    <td colSpan={6}>Not Transaction</td>
+                                </tr>
+                                :
+                                admin?.map((element, number) => {
+                                    number += 1
+                                    // console.log("income", income)
+                                    // console.log("subtotal", element.subtotal)
 
-                                    }}
-                                />
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Aziz Union</td>
-                        <td>Bekasi</td>
-                        <td>13450</td>
-                        <td style={{ color: "#061E99" }}>28.000</td>
-                        <td style={{ color: "#E83939" }}>Cancel</td>
-                        <td>
-                            <div className="d-flex justify-content-center">
-                                <Img
-                                    src={Cancel}
-                                    style={{
-                                        width: "20px",
-                                        height: "20px",
+                                    if (element.status === "Success") {
+                                        income += element.subtotal
 
-                                    }}
-                                />
-                            </div></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Lae Tanjung Balal</td>
-                        <td>Tanjung Balal</td>
-                        <td>21331</td>
-                        <td style={{ color: "#061E99" }}>38.000</td>
-                        <td style={{ color: "#00D1FF" }}>On The Way</td>
-                        <td>
-                            <div className="d-flex justify-content-center">
-                                <Img
-                                    src={Success}
-                                    style={{
-                                        width: "20px",
-                                        height: "20px",
-                                    }}
-                                />
-                            </div></td>
-                    </tr>
-                </tbody>
-            </Table >
-        </Container >
-    );
+                                    }
+                                    return (
+                                        <>
+                                            <tr>
+                                                <td>{number}</td>
+                                                <td>{element.name}</td>
+                                                <td>{element.address}</td>
+                                                <td>
+                                                    Rp.{element.subtotal}
+                                                </td>
+                                                <td>
+                                                    {
+                                                        element.status === "Payment" ?
+                                                            <label className="text-warning">Waiting Approve</label>
+                                                            : element.status === "Success" ?
+                                                                <label className="text-success">Success</label>
+                                                                : element.status === "Cancel" ?
+                                                                    <label className="text-danger">Cancel</label>
+                                                                    : null
+                                                    }
+                                                </td>
+                                                <th>
+                                                    {element.status === "Payment" ?
+                                                        <Stack direction="horizontal" gap={3} className="d-flex justify-content-center">
+                                                            <Button variant="danger" onClick={() => HandleCancel.mutate(element.id)}>Cancel {element.id}</Button>
+                                                            <Button variant="success" onClick={() => HandleAccept.mutate(element.id)}>Accept</Button>
+                                                        </Stack>
+                                                        : element.status === "Success" ?
+                                                            <div className="d-flex justify-content-center">
+                                                                <Img
+                                                                    src={Success}
+                                                                    style={{
+                                                                        width: "30px",
+                                                                        height: "30px",
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            : element.status === "Cancel" ?
+                                                                <div className="d-flex justify-content-center">
+                                                                    <Img
+                                                                        src={Cancel}
+                                                                        style={{
+                                                                            width: "30px",
+                                                                            height: "30px",
+
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                : null
+                                                    }
+                                                </th>
+                                            </tr>
+                                        </>
+                                    )
+                                })
+                        }
+                        <tr className="table-success" >
+                            <th colSpan={6}>Icome : Rp. {income}</th>
+                        </tr>
+                    </tbody>
+
+                </Table>
+            </Container>
+        </>
+    )
 }
 
 export default TableProduct;

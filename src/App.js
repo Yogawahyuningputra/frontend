@@ -81,25 +81,27 @@ function App() {
 
   return (
     <>
-      <>
-        <Navbar />
+      {isLoading ? null : (
+        <>
+          <Navbar />
 
-        <Routes>
-          <Route path="/" element={<Home />} />
+          <Routes>
+            <Route path="/" element={<Home />} />
 
-          {/* <Route path="/" element={adminRoute}> */}
-          <Route exact path="/Admin" element={<Admin />} />
-          <Route exact path="/AddTopping" element={<AddTopping />} />
-          <Route exact path="/AddProduct" element={<AddProduct />} />
-          {/* </Route> */}
+            {/* <Route path="/" element={adminRoute}> */}
+            <Route exact path="/Admin" element={<Admin />} />
+            <Route exact path="/AddTopping" element={<AddTopping />} />
+            <Route exact path="/AddProduct" element={<AddProduct />} />
+            {/* </Route> */}
 
-          {/* <Route path="/Profile" element={userRoute}> */}
-          <Route exact path="/Profile" element={<Profile />} />
-          <Route exact path="/DetailProduct/:id" element={<DetailProduct />} />
-          <Route exact path="/Cart" element={<Cart />} />
-          {/* </Route> */}
-        </Routes>
-      </>
+            {/* <Route path="/Profile" element={userRoute}> */}
+            <Route exact path="/Profile" element={<Profile />} />
+            <Route exact path="/DetailProduct/:id" element={<DetailProduct />} />
+            <Route exact path="/Cart" element={<Cart />} />
+            {/* </Route> */}
+          </Routes>
+        </>
+      )}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -9,7 +9,7 @@ import Button from "react-bootstrap/Button";
 import Img from "react-bootstrap/Image";
 import Card from "react-bootstrap/Card";
 import Delete from "../assest/images/delete.png";
-// import Attach from "../assest/images/attach.png";
+import Attach from "../assest/images/attach.png";
 import ModalPopUp from "../component/pop-up";
 // import Login from "../component/Login";
 // import Register from "../component/Register";
@@ -17,347 +17,424 @@ import { API } from "../config/api";
 import { useQuery, useMutation } from "react-query";
 import DeleteData from '../component/popUpDelete';
 import { UserContext } from "../../src/context/userContext";
+import { CardImg, FloatingLabel } from "react-bootstrap";
 
+
+const style = {
+    textTitle: {
+        fontWeight: "600",
+        fontSize: "32px",
+        lineHeight: "49px",
+
+        color: "#BD0707",
+    },
+
+    textRed: {
+        color: "#BD0707",
+    },
+
+    textCenter: {
+        textAlign: "center",
+    },
+
+    link: {
+        fontWeight: "bold",
+        textDecoration: "none",
+        color: "black",
+    },
+
+    ImgProduct: {
+        position: "relative",
+        width: "350px",
+    },
+
+    // Image Product 1
+    ImgLogo: {
+        position: "absolute",
+        width: "130px",
+        height: "auto",
+        top: "35%",
+        left: "77%",
+    },
+}
 
 function Cart() {
-    // const navigate = useNavigate()
 
-    const [modalShow, setModalShow] = useState(false)
+
+    // const { id } = useParams()
     const [state] = useContext(UserContext)
 
-    let { data: order, refetch } = useQuery("orderCache", async (id) => {
-        const res = await API.get(`/orders-id`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.token}`
-            }
-        });
-        return res.data.data;
-    });
-    console.log("data order", order)
+    let { data: order, refetch } = useQuery("ordersCache", async () => {
+        const response = await API.get("/orders-id")
+        return response.data.data
+    })
+    console.log("data order: ", order)
 
+    let Subtotal = 0
+    let Qty = 0
+    let IDTrans = 0
+    if (state.isLogin === true) {
+        order?.map(
+            (element) => (
+                (Subtotal += element.subtotal),
+                (Qty += element.qty),
+                (IDTrans = element.transaction_id)
+            )
+        )
+    }
 
-    // Handle Delete
-    // Variabel for delete product data
-    const [idDelete, setIdDelete] = useState(null);
-    const [confirmDelete, setConfirmDelete] = useState(null);
+    //Payment
+    const [DataPay, setState] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        poscode: "",
+        address: "",
+    })
 
-    // Modal Confirm delete data
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    // const { name, address } = form
 
-    // For get id product & show modal confirm delete data
-    const handleDelete = (id) => {
-        setIdDelete(id);
-        handleShow();
-    };
+    const handleOnChange = (e) => {
+        setState({
+            ...DataPay,
+            [e.target.name]: e.target.value,
+        })
+    }
 
-    // If confirm is true, execute delete data
-    const deleteById = useMutation(async (id) => {
+    let navigate = useNavigate()
+
+    const HandlePay = useMutation(async (e) => {
         try {
+            e.preventDefault()
+
             const config = {
-                method: "DELETE",
                 headers: {
-                    Authorization: "Basic" + localStorage.token,
+                    "Content-type": "application/json",
                 },
             }
-            await API.delete(`/order/` + id, config);
-            refetch();
+            const requestBody = JSON.stringify(DataPay)
+            const response = await API.patch(
+                "/updatetrans/" + IDTrans,
+                requestBody,
+                config
+            )
+            refetch()
+            navigate("/")
+            console.log("Transaksi", response)
         } catch (error) {
-            console.log(error);
+            console.log(error)
         }
-    });
+    })
 
-    useEffect(() => {
-        if (confirmDelete) {
-            handleClose();
-            deleteById.mutate(idDelete);
-            setConfirmDelete(null);
-        }
-    }, [confirmDelete]);
-
-    // Format harga
     const formatIDR = new Intl.NumberFormat(undefined, {
         style: "currency",
         currency: "IDR",
         maximumFractionDigits: 0,
     })
 
+    // const [showLogin, setShowLogin] = useState(true)
+    // const [showRegister, setShowRegister] = useState(false)
+    const [modalShow, setModalShow] = useState(false)
 
-    let Total = 0
-    let Qty = 0
-    let IDtrans = 0
+    //Delete order
+    const [idDelete, setIdDelete] = useState(null)
+    const [confirmDelete, setConfirmDelete] = useState(null)
 
-    if (state.role === "user") {
-        order?.map(
-            (element) => (
-                (Total += element.subtotal)
-                    (Qty += element.qty)
-                    (IDtrans = element.transaction_id)
-            )
-        )
-    }
-    console.log("ini", Qty)
-    console.log("ini total", Total)
-    console.log("ini state", state)
-    console.log("ini ID transaction", IDtrans)
-    console.log("data order", order)
+    const [show, setShow] = useState(false)
+    const handleClose = () => setShow(false)
+    const handleShow = () => setShow(true)
 
-    // console.log("ini subtotal", subtotal)
-
-
-
-    //pay
-    // const pay = []
-    const [DataPay, setDataPay] = useState({
-        name: "",
-        email: "",
-        phone: "",
-        posCode: "",
-        address: "",
-    })
-
-    // Handle Payment
-
-    const handleonChange = (e) => {
-        setDataPay({
-            ...DataPay,
-            [e.target.name]: e.target.value,
-        })
+    const handleDelete = (id) => {
+        setIdDelete(id)
+        handleShow()
     }
 
-    const handlePay = useMutation(async (e) => {
+    const deleteById = useMutation(async (id) => {
         try {
-            e.preventDefault()
             const config = {
+                method: "DELETE",
                 headers: {
-                    "Content-Type": "application/json",
+                    Authorization: "Basic " + localStorage.token,
                 },
             }
-            const requestBody = JSON.stringify(DataPay)
-            const response = await API.patch(
-                "/transaction/" + IDtrans, requestBody, config
-            )
-            console.log("data transaksi" / response)
+            await API.delete(`/order/${id}`, config)
+            refetch()
         } catch (error) {
             console.log(error)
         }
-
-
     })
 
-
-
-    // const handleOnSubmit = (e) => {
-    //     e.preventDefault()
-
-    //     if (addDataPay === null) {
-    //         pay.push(DataPay)
-    //         localStorage.setItem("DATA_PAY", JSON.stringify(pay))
-    //     } else {
-    //         addDataPay.forEach((element) => {
-    //             pay.push(element)
-    //         })
-    //         pay.push(DataPay)
-    //         localStorage.setItem("DATA_PAY", JSON.stringify(pay))
-    //     }
-    // }
-
-
-
+    useEffect(() => {
+        if (confirmDelete) {
+            // Close modal confirm delete data
+            handleClose()
+            // execute delete data by id function
+            deleteById.mutate(idDelete)
+            setConfirmDelete(null)
+        }
+    }, [confirmDelete])
     return (
-        // <>
-        //     {state.isLogin === false ? (
-        //         <>
-        //         </>
-        //     ) : (
-        //         <>
-        <Container className="mx-auto mt-4 justify-content-center">
-            <Row>
+        <>
+            <Container className="my-5">
+                <Card className="mt-5" style={{ border: "white" }}>
+                    <Row>
+                        <Card.Title className="mb-5" style={style.textTitle}>
+                            My Cart
+                        </Card.Title>
+                        <Col sm={8} className="pe-5" style={style.textRed}>
+                            <Card.Body className="p-0" style={{ width: "100%" }}>
+                                <Card.Body className="m-0 p-0" style={{ width: "100%" }}>
+                                    <Card.Text style={{ fontWeight: "bold" }}>
+                                        Review Your Order
+                                    </Card.Text>
+                                    <hr style={style.textRed} className="m-0" />
+                                    <Stack>
+                                        {/* Data pembelian product */}
 
-                <Col style={{ color: "#bd0707", marginLeft: "100px" }}>
-                    <Stack direction="horizontal" gap={3}>
+                                        {order?.map((data, index) => (
+                                            <Card.Body className="pe-0" key={index}>
+                                                <Stack direction="horizontal" gap={4}>
+                                                    <Card.Img
+                                                        src={data?.product?.image}
+                                                        style={{ width: "20%" }}
+                                                    />
+                                                    <Stack
+                                                        direction="horizontal"
+                                                        className="flex-fill"
+                                                    >
+                                                        <Card.Body className="ps-0 m-0 w-100" style={style.textRed}>
+                                                            <Card.Title
+                                                                className="mb-2"
+                                                                style={style.textRed}
+                                                            >
+                                                                {data?.product?.title}
+                                                            </Card.Title>
+                                                            <Stack
+                                                                direction="horizontal"
+                                                                className="align-items-start"
+                                                            >
+                                                                <Card.Text
+                                                                    className="m-0"
+                                                                    style={{
+                                                                        fontSize: "15px",
+                                                                        color: "",
+                                                                        fontWeight: "bold",
+                                                                    }}
+                                                                >
+                                                                    Toping
+                                                                </Card.Text>
+                                                                <Card.Text
+                                                                    className="ms-2"
+                                                                    style={{
+                                                                        fontSize: "12px",
+                                                                        color: "#BD0707",
+                                                                    }}
+                                                                >
+                                                                    :{" "}
+                                                                    {data.toppings?.map((data) => (
+                                                                        <>{data.title}, </>
+                                                                    ))}
+                                                                </Card.Text>
+                                                            </Stack>
+                                                        </Card.Body>
 
-                        <Card.Text className="">
-                            <p style={{ fontWeight: "bold", fontSize: "24px" }}>My Cart</p>
-                            <p style={{ fontSize: "20px", marginTop: "20px" }}>Review Your Order</p>
-                        </Card.Text>
-                    </Stack>
-                    <hr></hr>
-                    {order?.map((data, index) => (
-                        <Stack direction="horizontal" xs={2} gap={3} className="mt-0">
-                            <Card className="mb-2">
-                                <Img
-                                    src={data?.product?.image}
-                                    style={{
-                                        width: "100px",
-                                        height: "120px",
-                                        border: "20px"
-                                    }}
-                                />
-                            </Card>
-                            <Card.Text className="mx-4">
-                                <p style={{ fontWeight: "bold" }}>{data?.product?.title}</p>
-                                <p>Topping :&nbsp;
-
-                                    {data?.toppings?.map(
-                                        (e) => (
-                                            <>
-                                                {e?.title},&nbsp;
-                                            </>
+                                                        <Card.Body className=" p-0 m-0">
+                                                            <Card.Text style={style.textRed}>
+                                                                {formatIDR.format(data?.subtotal)}
+                                                            </Card.Text>
+                                                            <Button
+                                                                variant="light"
+                                                                className="p-0 ms-5"
+                                                                onClick={() => {
+                                                                    handleDelete(data?.id)
+                                                                }}
+                                                            >
+                                                                <Card.Img
+                                                                    src={Delete}
+                                                                    style={{ width: "100%" }}
+                                                                />
+                                                            </Button>
+                                                        </Card.Body>
+                                                    </Stack>
+                                                </Stack>
+                                            </Card.Body>
                                         ))}
-                                </p>
-                            </Card.Text>
-                            <Card.Text className="mb-5 ms-auto" >
-                                <Card.Text >{formatIDR.format(data?.subtotal)}</Card.Text>
-                                <Card.Text>
-                                    <Button onClick={() => {
-                                        handleDelete(data?.id);
-                                    }}
-                                        style={{ backgroundColor: "white", border: "none" }}>
-                                        <Img
-                                            src={Delete}
-                                            style={{
-                                                width: "20px",
-                                                height: "20px",
-                                                float: "right",
-                                                marginRight: "10px"
-                                            }}
-                                        />
+                                    </Stack>
+                                    <hr style={style.textRed} className="mt-0" />
+                                </Card.Body>
+
+                                <Stack direction="horizontal">
+                                    <Card.Body style={{ width: "60%" }} className="px-0">
+                                        <hr style={style.textRed} className="m-0" />
+                                        <Stack direction="horizontal">
+                                            <Card.Body>
+                                                <Card.Text style={style.textRed}>
+                                                    Subtotal
+                                                </Card.Text>
+                                                <Card.Text style={style.textRed}>Qty</Card.Text>
+                                            </Card.Body>
+                                            <Card.Body>
+                                                <Card.Text
+                                                    style={style.textRed}
+                                                    className="text-end"
+                                                >
+                                                    {formatIDR.format(Subtotal)}
+                                                </Card.Text>
+                                                <Card.Text
+                                                    style={style.textRed}
+                                                    className="text-end"
+                                                >
+                                                    {Qty}
+                                                </Card.Text>
+                                            </Card.Body>
+                                        </Stack>
+                                        <hr style={style.textRed} />
+                                        <Stack direction="horizontal">
+                                            <Card.Body>
+                                                <Card.Text style={style.textRed}>Total</Card.Text>
+                                            </Card.Body>
+                                            <Card.Body>
+                                                <Card.Text
+                                                    style={style.textRed}
+                                                    className="text-end"
+                                                >
+                                                    {formatIDR.format(Subtotal)}
+                                                </Card.Text>
+                                            </Card.Body>
+                                        </Stack>
+                                    </Card.Body>
+
+                                    <Card.Body style={{ width: "40%" }}>
+                                        <Form.Group controlId="formFile" className="m-3">
+                                            <Form.Label className="w-100">
+                                                <Card
+                                                    // className="px-3"
+                                                    style={{
+                                                        border: "1px solid #BD0707",
+                                                        backgroundColor: "#E0C8C840",
+                                                    }}
+                                                >
+                                                    <CardImg
+                                                        src={Attach}
+                                                        className="w-25  m-auto my-3"
+                                                    />
+                                                    <Card.Text
+                                                        className="m-auto mb-3"
+                                                        style={{ color: "#68323280" }}
+                                                    >
+                                                        Attache of Transaction
+                                                    </Card.Text>
+                                                </Card>
+                                            </Form.Label>
+                                            <Form.Control
+                                                type="file"
+                                                style={{ display: "none" }}
+                                            />
+                                        </Form.Group>
+                                    </Card.Body>
+                                </Stack>
+                            </Card.Body>
+                        </Col>
+
+                        {/* ====================================================================== */}
+
+                        <Col sm={4} className="pt-5">
+                            <Form
+                                onSubmit={(e) => HandlePay.mutate(e)}
+                                className="m-auto mt-3 d-grid gap-4 w-100"
+                            >
+                                <Form.Group className="mb-3 " controlId="name">
+                                    <Form.Control
+                                        onChange={handleOnChange}
+                                        // value={DataPay.name}
+                                        name="name"
+                                        style={{ border: "1px solid #BD0707" }}
+                                        type="text"
+                                        placeholder="Name"
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="email">
+                                    <Form.Control
+                                        onChange={handleOnChange}
+                                        // value={DataPay.email}
+                                        name="email"
+                                        style={{ border: "1px solid #BD0707" }}
+                                        type="email"
+                                        placeholder="Email"
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="phone">
+                                    <Form.Control
+                                        onChange={handleOnChange}
+                                        // value={DataPay.phone}
+                                        name="phone"
+                                        style={{ border: "1px solid #BD0707" }}
+                                        type="text"
+                                        placeholder="Phone"
+                                    />
+                                </Form.Group>
+
+                                <Form.Group className="mb-3" controlId="poscode">
+                                    <Form.Control
+                                        onChange={handleOnChange}
+                                        // value={DataPay.posCode}
+                                        name="poscode"
+                                        style={{ border: "1px solid #BD0707" }}
+                                        type="text"
+                                        placeholder="Pos Code"
+                                    />
+                                </Form.Group>
+
+                                <FloatingLabel
+                                    className="mb-3"
+                                    controlId="floatingTextarea2"
+                                    label="Comments"
+                                >
+                                    <Form.Control
+                                        onChange={handleOnChange}
+                                        // value={DataPay.address}
+                                        name="address"
+                                        as="textarea"
+                                        placeholder="Address"
+                                        style={{
+                                            height: "100px",
+                                            resize: "none",
+                                            border: "1px solid #BD0707",
+                                        }}
+                                    />
+                                </FloatingLabel>
+                                <>
+                                    <Button
+                                        onClick={() => {
+                                            setModalShow(true)
+                                        }}
+                                        variant="outline-light"
+                                        style={{ backgroundColor: "#BD0707" }}
+                                        type="submit"
+                                    >
+                                        Pay
+                                        {/* {IDTrans} */}
                                     </Button>
 
-                                    <DeleteData
-                                        setConfirmDelete={setConfirmDelete}
-                                        show={show}
-                                        handleClose={handleClose}
+                                    <ModalPopUp
+                                        show={modalShow}
+                                        onHide={() => setModalShow(false)}
                                     />
-
-                                </Card.Text>
-                            </Card.Text>
-                        </Stack>
-                    ))}
-                    <hr />
-
-                    <hr />
-                    <Stack direction="horizontal">
-                        <Card.Body>
-                            <Card.Text style={{}}>Subtotal</Card.Text>
-                            <Card.Text style={{}}>Qty</Card.Text>
-                        </Card.Body>
-                        <Card.Body>
-                            <Card.Text style={{}} className="text-end">
-                                {!!order === false || order?.length === 0
-                                    ? 0
-                                    : formatIDR.format(
-                                        order
-                                            .map((e) => e.subtotal)
-                                            .reduce((a, b) => a + b)
-                                    )}
-                            </Card.Text>
-                            <Card.Text style={{}} className="Quantity  text-end">
-
-                                {order?.length}
-
-                            </Card.Text>
-                        </Card.Body>
-                    </Stack>
-                    <hr style={{}} />
-                    <Stack direction="horizontal">
-                        <Card.Body>
-                            <Card.Text style={{}}>Total</Card.Text>
-                        </Card.Body>
-                        <Card.Body>
-                            <Card.Text style={{}} className="text-end">
-                                {!!order === false || order?.length === 0
-                                    ? 0
-                                    : formatIDR.format(
-                                        order
-                                            .map((e) => e.subtotal)
-                                            .reduce((a, b) => a + b)
-                                    )}
-                            </Card.Text>
-                        </Card.Body>
-                    </Stack>
-                    <hr></hr>
-                </Col>
-
-                {/* ------------------------Payment--------------------------- */}
-
-                <Col>
-                    <Container className="px-5 py-5" style={{ width: "70%", marginTop: "70px" }}>
-                        <Form onSubmit={(e) => handlePay.mutate(e)}>
-                            <Form.Group className="mb-4 " controlId="formBasicEmail">
-                                <Form.Control onChange={handleonChange}
-                                    className=""
-                                    style={{ borderColor: "#bd0707" }}
-                                    type="text"
-                                    placeholder="Name"
-                                    name="name"
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-4" controlId="formBasicEmail">
-                                <Form.Control onChange={handleonChange}
-                                    // value={DataPay.email}
-                                    className=""
-                                    style={{ borderColor: "#bd0707" }}
-                                    type="email"
-                                    placeholder="Email"
-                                    name="email"
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-4" controlId="formBasicPhone">
-                                <Form.Control
-                                    onChange={handleonChange}
-
-                                    // value={DataPay.phone}
-                                    className=""
-                                    style={{ borderColor: "#bd0707" }}
-                                    type="telp"
-                                    placeholder="Phone"
-                                    name="phone"
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-4" controlId="formBasicNumber">
-                                <Form.Control onChange={handleonChange}
-                                    // value={DataPay.posCode}
-                                    className=""
-                                    style={{ borderColor: "#bd0707" }}
-                                    type="number"
-                                    placeholder="Pos Code"
-                                    name="poscode"
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-4" controlId="formBasicAddress">
-                                <Form.Control
-                                    onChange={handleonChange}
-                                    //     value={DataPay.address}
-                                    as="textarea" rows={4}
-                                    style={{ borderColor: "#bd0707" }}
-                                    type="textarea"
-                                    placeholder="Address"
-                                    name="address"
-                                />
-                            </Form.Group>
-                            <Button
-                                onClick={() => { setModalShow(true) }}
-                                variant="danger"
-                                className="w-100 d-grid gap-2"
-                                size="lg"
-                                type="submit"
-                            >
-                                Pay{IDtrans}
-                            </Button>
-                            <ModalPopUp show={modalShow} onHide={() => setModalShow(false)} />
-                        </Form>
-                    </Container>
-                </Col>
-            </Row>
-        </Container>
-        //         </>
-        //     )}
-        // </>
+                                </>
+                            </Form>
+                        </Col>
+                    </Row>
+                </Card>
+            </Container>
+            <DeleteData
+                setConfirmDelete={setConfirmDelete}
+                show={show}
+                handleClose={handleClose}
+            />
+        </>
     )
 }
-
 
 export default Cart;

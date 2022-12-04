@@ -4,20 +4,20 @@ import './index.css';
 import App from './App';
 import { QueryClient, QueryClientProvider } from "react-query";
 
-import { UserContextProvider } from './context/userContext';
+import { UseContextProvider } from './context/userContext';
 import { BrowserRouter as Router } from 'react-router-dom';
 const client = new QueryClient();
 // const root = ReactDOM.createRoot(document.getElementById('root'));
 ReactDOM.render(
 
   <React.StrictMode>
-    <UserContextProvider>
+    <UseContextProvider>
       <QueryClientProvider client={client}>
         <Router>
           <App />
         </Router>
       </QueryClientProvider>
-    </UserContextProvider>
+    </UseContextProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
