@@ -14,7 +14,8 @@ function ModalPopUp({ show, onHide }) {
         >
             <Modal.Body>
                 <h4 style={{ color: "#469F74", width: "auto", height: "auto" }} className="text-center m-0 p-5">
-                    Product Berhasil Di Tambahkan </h4>
+                    Your payment will be confirmed within 1 x 24 hours
+                    To see orders click <h5>Here</h5>Thank you </h4>
             </Modal.Body>
         </Modal>
     )

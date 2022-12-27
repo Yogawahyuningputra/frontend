@@ -13,8 +13,8 @@ import { useQuery } from "react-query";
 
 function NavBar() {
   const [state, dispatch] = useContext(UserContext);
-  console.log("isi dari state", state);
-  console.log("ini dispatch", dispatch)
+  console.log("isi dari state navbar", state);
+  console.log("ini dispatch navbar", dispatch)
 
   const [LoginShow, setLoginShow] = useState(false);
   const [RegisterShow, setRegisterShow] = useState(false);

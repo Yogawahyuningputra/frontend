@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Img from "react-bootstrap/Image";
+// import Img from "react-bootstrap/Image";
 import Card from "react-bootstrap/Card";
 import Delete from "../assest/images/delete.png";
 import Attach from "../assest/images/attach.png";
@@ -15,9 +15,10 @@ import ModalPopUp from "../component/pop-up";
 // import Register from "../component/Register";
 import { API } from "../config/api";
 import { useQuery, useMutation } from "react-query";
-import DeleteData from '../component/popUpDelete';
 import { UserContext } from "../../src/context/userContext";
 import { CardImg, FloatingLabel } from "react-bootstrap";
+import DeleteData from '../component/popUpDelete';
+
 
 
 const style = {
@@ -118,6 +119,33 @@ function Cart() {
                 requestBody,
                 config
             )
+            console.log("cart : ", response)
+
+            const token = response.data.data.token
+            console.log("rs snap =>", response)
+
+            window.snap.pay(token, {
+                onSuccess: function (result) {
+                    /* You may add your own implementation here */
+                    console.log(result)
+                    navigate("/")
+                },
+                onPending: function (result) {
+                    /* You may add your own implementation here */
+                    console.log(result)
+                    navigate("/")
+                },
+                onError: function (result) {
+                    /* You may add your own implementation here */
+                    console.log(result)
+                },
+                onClose: function () {
+                    /* You may add your own implementation here */
+                    alert("you closed the popup without finishing the payment")
+                },
+            })
+
+
             refetch()
             navigate("/")
             console.log("Transaksi", response)
@@ -125,6 +153,24 @@ function Cart() {
             console.log(error)
         }
     })
+
+    useEffect(() => {
+        //change this to the script source you want to load, for example this is snap.js sandbox env
+        const midtransScriptUrl = "https://app.sandbox.midtrans.com/snap/snap.js"
+        //change this according to your client-key
+        const myMidtransClientKey = "SB-Mid-client-qHCTl1fy6TJrnF4-"
+
+        let scriptTag = document.createElement("script")
+        scriptTag.src = midtransScriptUrl
+        // optional if you want to set script attribute
+        // for example snap.js have data-client-key attribute
+        scriptTag.setAttribute("data-client-key", myMidtransClientKey)
+
+        document.body.appendChild(scriptTag)
+        return () => {
+            document.body.removeChild(scriptTag)
+        }
+    }, [])
 
     const formatIDR = new Intl.NumberFormat(undefined, {
         style: "currency",
@@ -327,7 +373,7 @@ function Cart() {
                                                 </Card>
                                             </Form.Label>
                                             <Form.Control
-                                                type="file"
+                                                type="button"
                                                 style={{ display: "none" }}
                                             />
                                         </Form.Group>
@@ -418,10 +464,10 @@ function Cart() {
                                         {/* {IDTrans} */}
                                     </Button>
 
-                                    <ModalPopUp
+                                    {/* <ModalPopUp
                                         show={modalShow}
                                         onHide={() => setModalShow(false)}
-                                    />
+                                    /> */}
                                 </>
                             </Form>
                         </Col>

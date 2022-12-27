@@ -60,9 +60,9 @@ function TableProduct() {
         <>
             <Container>
                 <h2>Transaction</h2>
-                <Table responsive striped bordered hover className="my-3 table-dark">
+                <Table responsive striped bordered hover className="my-3 table-gray">
                     <thead>
-                        <tr className="table-dark">
+                        <tr className="table-gray">
                             <th>No</th>
                             <th>Name</th>
                             <th>Address</th>

@@ -1,3 +1,5 @@
+import React, { useContext } from "react";
+
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -10,7 +12,25 @@ import Brand from "../assest/images/Headerwaysbucks.png";
 import Profile from "../assest/images/Profile.png";
 
 import QR from "../assest/images/qrcode.png";
-function Cart() {
+import { UserContext } from '../context/userContext';
+
+import { API } from "../config/api";
+import { useQuery } from "react-query";
+
+function Admin() {
+    const { state } = useContext(UserContext);
+    console.log("isi state", state)
+
+    let { data: profiles } = useQuery("caches", async () => {
+        const config = {
+            headers: {
+                "Content-type": "application/json",
+            },
+        }
+        const response = await API.get("/user/" + state.user.id, config)
+        return response.data.data
+    })
+    console.log("data profile: ", profiles)
 
     return (
         <Container className="d-flex mx-auto mt-4 justify-content-center">
@@ -19,7 +39,7 @@ function Cart() {
                     <Stack direction="horizontal" gap={3}>
 
                         <Card.Text className="">
-                            <p style={{ fontWeight: "bold", fontSize: "24px" }}>My Profile</p>
+                            <Card.Text style={{ fontWeight: "bold", fontSize: "24px" }}>My Profile</Card.Text>
                         </Card.Text>
                     </Stack>
                     <Stack direction="horizontal" gap={3}>
@@ -37,12 +57,12 @@ function Cart() {
                         </Card.Body>
                         <Card.Body>
                             <Card.Text className="">
-                                <p style={{ fontWeight: "bold" }}>Fullname</p>
-                                {/* <p>{DataLogin[0].name}</p> */}
+                                <Card.Text style={{ fontWeight: "bold" }}>Fullname</Card.Text>
+                                <Card.Text>{profiles?.name}</Card.Text>
                             </Card.Text>
                             <Card.Text className="">
-                                <p style={{ fontWeight: "bold" }}>Email</p>
-                                {/* <p>{DataLogin[0].email}</p> */}
+                                <Card.Text style={{ fontWeight: "bold" }}>Email</Card.Text>
+                                <Card.Text>{profiles?.email}</Card.Text>
                             </Card.Text>
                         </Card.Body>
                     </Stack>
@@ -144,4 +164,4 @@ function Cart() {
     );
 }
 
-export default Cart;
+export default Admin;

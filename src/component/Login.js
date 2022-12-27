@@ -17,6 +17,7 @@ function Login({ show, onHide, onLogin, onRegister, setLoginShow }) {
 
   let navigate = useNavigate();
   const [state, dispatch] = useContext(UserContext);
+  console.log(state)
   const [message, setMessage] = useState(null);
   const [user, setUser] = useState({
     email: "",
@@ -37,7 +38,7 @@ function Login({ show, onHide, onLogin, onRegister, setLoginShow }) {
       // Insert data for login process
       const response = await API.post('/login', user)
 
-      const alert = (<Alert variant='success' className='py-1'>
+      const alert = (<Alert variant="success" className='py-1'>
         Success
       </Alert>)
       setMessage(alert)

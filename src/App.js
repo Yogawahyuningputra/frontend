@@ -27,9 +27,9 @@ function App() {
       setAuthToken(localStorage.token);
     }
 
-    if (state.isLogin === false && !isLoading) {
-      navigate("/");
-    }
+    // if (state.isLogin === false && !isLoading) {
+    //   navigate("/");
+    // }
   }, [state]);
 
   const checkUser = async () => {
@@ -56,10 +56,10 @@ function App() {
         payload,
       });
       console.log("ini data state", state)
-      setIsLoading(false)
+      // setIsLoading(false)
     } catch (error) {
       console.log(error);
-      setIsLoading(false)
+      // setIsLoading(false)
     }
   };
 
@@ -81,27 +81,27 @@ function App() {
 
   return (
     <>
-      {isLoading ? null : (
-        <>
-          <Navbar />
+      {/* {isLoading ? null : ( */}
+      <>
+        <Navbar />
 
-          <Routes>
-            <Route path="/" element={<Home />} />
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-            {/* <Route path="/" element={adminRoute}> */}
-            <Route exact path="/Admin" element={<Admin />} />
-            <Route exact path="/AddTopping" element={<AddTopping />} />
-            <Route exact path="/AddProduct" element={<AddProduct />} />
-            {/* </Route> */}
+          {/* <Route path="/" element={adminRoute}> */}
+          <Route exact path="/Admin" element={<Admin />} />
+          <Route exact path="/AddTopping" element={<AddTopping />} />
+          <Route exact path="/AddProduct" element={<AddProduct />} />
+          {/* </Route> */}
 
-            {/* <Route path="/Profile" element={userRoute}> */}
-            <Route exact path="/Profile" element={<Profile />} />
-            <Route exact path="/DetailProduct/:id" element={<DetailProduct />} />
-            <Route exact path="/Cart" element={<Cart />} />
-            {/* </Route> */}
-          </Routes>
-        </>
-      )}
+          {/* <Route path="/Profile" element={userRoute}> */}
+          <Route exact path="/Profile" element={<Profile />} />
+          <Route exact path="/DetailProduct/:id" element={<DetailProduct />} />
+          <Route exact path="/Cart" element={<Cart />} />
+          {/* </Route> */}
+        </Routes>
+      </>
+      {/* )} */}
     </>
   );
 }
