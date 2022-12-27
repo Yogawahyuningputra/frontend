@@ -107,7 +107,7 @@ function Login({ show, onHide, onLogin, onRegister, setLoginShow }) {
           >
             Login
           </Button>
-          <p className="mt-3 fw-2">Don't have an account ? Klik <Link onClick={onRegister} style={{ fontWeight: "bold", textDecoration: "none", color: "black" }}>Here</Link></p>
+          <p className="mt-3">Don't have an account ? Klik <Link onClick={onRegister} style={{ fontWeight: "bold", textDecoration: "none", color: "black" }}>Here</Link></p>
 
         </Form>
 

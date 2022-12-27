@@ -68,38 +68,7 @@ function Register({ show, onHide, onLogin, setLoginShow, setRegistershow }) {
       console.log(err)
     }
   })
-  // Notification
 
-  // if (response.data.code === 'success...') {
-  //   const alert = (
-  //     <Alert variant="success" className="py-1">
-  //       Success
-  //     </Alert>
-  //   );
-  //   setMessage(alert);
-  //   setUser({
-  //     name: '',
-  //     email: '',
-  //     password: '',
-  //   });
-  // } else {
-  //   const alert = (
-  //     <Alert variant="danger" className="py-1">
-  //       Failed
-  //     </Alert>
-  //   );
-  //   setMessage(alert);
-  // }
-  //   } catch (error) {
-  //     const alert = (
-  //       <Alert variant="danger" className="py-1">
-  //         Failed
-  //       </Alert>
-  //     );
-  //     setMessage(alert);
-  //     console.log(error);
-  //   }
-  // });
 
 
   return (
@@ -163,7 +132,7 @@ function Register({ show, onHide, onLogin, setLoginShow, setRegistershow }) {
           >
             Register
           </Button>
-          <Form.Label>Don't have an account ? Click <Link onClick={onLogin} style={{ fontWeight: "bold", textDecoration: "none", color: "black" }}>Here</Link></Form.Label>
+          <Form.Label className="mt-3 fw-2">Don't have an account ? Click <Link onClick={onLogin} style={{ fontWeight: "bold", textDecoration: "none", color: "black" }}>Here</Link></Form.Label>
         </Form>
       </Container>
     </Modal>
